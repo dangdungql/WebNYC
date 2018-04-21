@@ -1,5 +1,4 @@
 <?php  
-$dm=$_GET['dm'];
 include('header.php');
 include('slider.php');
 ?>
@@ -22,7 +21,7 @@ include('slider.php');
 				<div class="row">
 					<?php
 						//đặt số bản ghi cần hiện thị
-						$limit=2;
+						$limit=5;
 						//xác định vị trí bắt đầu
 						if(isset($_GET['s']) && filter_var($_GET['s'],FILTER_VALIDATE_INT,array('min_range'=>1)))
 						{
@@ -39,7 +38,7 @@ include('slider.php');
 						else
 						{
 							//Nếu p không có, thì sẽ truy vấn CSDL để tìm xem có bao nhiêu page
-							$query_pg="SELECT COUNT(id) FROM tblsanpham";
+							$query_pg="SELECT COUNT(id) FROM tblsanpham WHERE ten LIKE '%{$tukhoa}%'";
 							$results_pg=mysqli_query($dbc,$query_pg);
 							kt_query($results_pg,$query_pg);
 							list($record)=mysqli_fetch_array($results_pg,MYSQLI_NUM);
@@ -52,7 +51,7 @@ include('slider.php');
 								$per_page=1;
 							}
 						} 
-						$query="SELECT * FROM tblsanpham ORDER BY id DESC LIMIT {$start},{$limit}";
+						$query="SELECT * FROM tblsanpham WHERE ten LIKE '%{$tukhoa}%' AND status='0' ORDER BY id DESC LIMIT {$start},{$limit}";
 						$results=mysqli_query($dbc,$query);
 						kt_query($results,$query);
 						while($sanpham=mysqli_fetch_array($results,MYSQLI_ASSOC))
@@ -65,32 +64,15 @@ include('slider.php');
 								</div>
 								<div class="sanpham_box_detail">
 									<div href="" class="sanpham_box_name sanpham_box_id<?php echo $sanpham['id']; ?>" id="<?php echo $sanpham['id']; ?>"><?php echo $sanpham['ten']; ?></div>
-									<div href="" class="sanpham_box_noidung sanpham_box_id<?php echo $sanpham['id']; ?>" id="<?php echo $sanpham['id']; ?>"><?php echo $sanpham['noidung']; ?></div>
+									<div href="" class="sanpham_box_noidung sanpham_box_id<?php echo $sanpham['id']; ?>" id="<?php echo $sanpham['id']; ?>"><?php echo $sanpham['tomtat']; ?></div>
 
 									<div class="sanpham_box_bottom">
 										<div class="sanpham_box_gia">Giá:&nbsp;<?php echo number_format($sanpham['gia'],0,'.','.').'&nbsp;'.$sanpham['donvitinh']; ?></div>
-										<a class="sanpham_box_order" id="addcart<?php echo $sanpham['id']; ?>">Thêm vào giỏ hàng</a>
+										<a href="sanphamchitiet.php?id=<?php echo $sanpham['id'];?>" class="sanpham_box_order">Xem Chi Tiết</a>
 									</div>
 								</div>
 						</div>
 						</a>
-						<script type="text/javascript">
-							$(document).ready(function(){
-								$("#addcart<?php echo $sanpham['id']; ?>").click(function(){
-									var id=$(".sanpham_box_id<?php echo $sanpham['id']; ?>").attr('id');
-									$.ajax({
-										type: "POST",
-										url: "addcart.php",
-										data: {id : id},
-										cache:false,
-										success:function(results){
-											alert("Sản phẩm đã được thêm vào giỏ hàng");
-											window.location.reload();	
-										}
-									});
-								});
-							});
-						</script>
 						<?php
 						}
 						echo "<ul class='pagination'>";
@@ -100,14 +82,14 @@ include('slider.php');
 							//Nếu không phải trang đầu thì hiện thị trang trước
 							if($current_page !=1)
 							{
-								echo "<li><a href='sanpham.php?dm={$dm}&s=".($start-$limit)."&p={$per_page}'>Back</a></li>";
+								echo "<li><a href='sanpham_1.php?s=".($start-$limit)."&p={$per_page}'>Back</a></li>";
 							}
 							//hiện thị những phần còn lại của trang
 							for ($i=1; $i <= $per_page ; $i++) 
 							{ 
 								if($i!=$current_page)
 								{
-									echo "<li><a href='sanpham.php?dm={$dm}&s=".($limit*($i-1))."&p={$per_page}'>{$i}</a></li>";
+									echo "<li><a href='sanpham_1.php?s=".($limit*($i-1))."&p={$per_page}'>{$i}</a></li>";
 								}
 								else
 								{
@@ -117,7 +99,7 @@ include('slider.php');
 							//Nếu không phải trang cuối thì hiện thị nút next
 							if($current_page !=$per_page)
 							{
-								echo "<li><a href='sanpham.php?dm={$dm}&s=".($start+$limit)."&p={$per_page}'>Next</a></li>";
+								echo "<li><a href='sanpham_1.php?s=".($start+$limit)."&p={$per_page}'>Next</a></li>";
 							}
 						}
 						echo "</ul>";
